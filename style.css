@@ -1,0 +1,60 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 1px;
+    margin-bottom: 20px;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.cell.active {
+    background-color: black;
+}
+
+#image-area {
+    margin-top: 20px;
+}
+
+#download-area {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+canvas {
+    margin: 5px;
+    border: grey solid 1px;
+}
