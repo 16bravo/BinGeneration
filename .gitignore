@@ -1,0 +1,9 @@
+# Fichiers système Windows
+Thumbs.db
+Desktop.ini
+
+# Fichiers temporaires de l'éditeur
+.vscode/
+*.log
+*.tmp
+*.bak

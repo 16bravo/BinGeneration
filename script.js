@@ -1,20 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const gridSize = 10;
+    const defaultGridSize = 10;
+    let gridSize = defaultGridSize; // Taille de la grille par défaut
     const imageCount = 62;
     const drawingArea = document.getElementById("drawing-area");
     const imageArea = document.getElementById("image-area");
+    const generateGridBtn = document.getElementById("generate-grid-btn");
+    const generateBtn = document.getElementById("generate-btn");
     const downloadBtn = document.getElementById("download-btn");
     const downloadAnimationBtn = document.getElementById("download-animation-btn");
 
-    // Initialisation de la grille de dessin
     let grid = createGrid(gridSize);
-    grid.forEach(row => {
-        row.forEach(cell => {
-            drawingArea.appendChild(cell.element);
-        });
+    renderGrid(grid);
+
+    generateGridBtn.addEventListener("click", () => {
+        gridSize = parseInt(document.getElementById("grid-size").value, 10);
+        console.log(gridSize);
+        grid = createGrid(gridSize);
+        renderGrid(grid);
     });
 
-    document.getElementById("generate-btn").addEventListener("click", () => {
+    generateBtn.addEventListener("click", () => {
         generateImages(grid, imageCount);
     });
 
@@ -22,17 +27,19 @@ document.addEventListener("DOMContentLoaded", function () {
     downloadAnimationBtn.addEventListener("click", downloadAnimation);
 
     function createGrid(size) {
-        let grid = [];
+        const grid = [];
         for (let y = 0; y < size; y++) {
-            let row = [];
+            const row = [];
             for (let x = 0; x < size; x++) {
-                let cell = {
+                const cell = {
                     x: x,
                     y: y,
                     state: 0,
                     element: document.createElement("div")
                 };
                 cell.element.classList.add("cell");
+                cell.element.style.width = `${drawingArea.clientWidth / size}px`;
+                cell.element.style.height = `${drawingArea.clientHeight / size}px`;
                 cell.element.addEventListener("click", () => {
                     cell.state = cell.state === 0 ? 1 : 0;
                     updateCell(cell);
@@ -42,6 +49,17 @@ document.addEventListener("DOMContentLoaded", function () {
             grid.push(row);
         }
         return grid;
+    }
+
+    function renderGrid(grid) {
+        drawingArea.innerHTML = '';  // Clear previous grid
+        drawingArea.style.gridTemplateColumns = `repeat(${gridSize}, 30px)`; // Set the number of columns based on gridSize
+        drawingArea.style.gridTemplateRows = `repeat(${gridSize}, 30px)`; // Set the number of rows based on gridSize
+        grid.forEach(row => {
+            row.forEach(cell => {
+                drawingArea.appendChild(cell.element);
+            });
+        });
     }
 
     function updateCell(cell) {
@@ -59,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function generateNextImage(grid) {
         const size = grid.length;
-        let newGrid = Array.from({ length: size }, () => Array(size).fill(0));
+        const newGrid = Array.from({ length: size }, () => Array(size).fill(0));
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 const sum = getAdjacentSum(grid, x, y);
@@ -90,9 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const canvas = document.createElement("canvas");
         canvas.width = grid.length * 10;
         canvas.height = grid.length * 10;
-        
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        
+        const ctx = canvas.getContext("2d");
         grid.forEach((row, y) => {
             row.forEach((cell, x) => {
                 ctx.fillStyle = cell === 1 ? "black" : "white";
@@ -100,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
         imageArea.appendChild(canvas);
-    }    
+    }
 
     async function downloadImagesAsZip() {
         const images = imageArea.querySelectorAll("canvas");
@@ -120,13 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const images = Array.from(imageArea.querySelectorAll("canvas"));
         const frames = [];
         
-        // Capture chaque canvas en image avec html2canvas
+        // Capture each canvas as image with html2canvas
         Promise.all(images.map(canvas => {
             return html2canvas(canvas, { scale: 1 }).then(capturedCanvas => {
                 return capturedCanvas.toDataURL("image/png");
             });
         })).then(imageDataURLs => {
-            // Générer le GIF avec gifshot
+            // Generate GIF with gifshot
             gifshot.createGIF({
                 images: imageDataURLs,
                 gifWidth: gridSize * 10,
@@ -147,20 +163,18 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-    
-    // Convertir un Data URL en Blob
+
     function dataURLToBlob(dataURL) {
         const parts = dataURL.split(',');
         const mime = parts[0].match(/:(.*?);/)[1];
         const bstr = atob(parts[1]);
         let n = bstr.length;
         const u8arr = new Uint8Array(n);
-    
+
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
         }
-    
+
         return new Blob([u8arr], { type: mime });
     }
-    
 });
